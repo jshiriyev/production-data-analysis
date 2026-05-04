@@ -42,10 +42,10 @@ plots = [
 ]
 
 [project.urls]
-Homepage = "https://github.com/jshiriyev/data-driven-forecasting"
-Documentation = "https://github.com/jshiriyev/data-driven-forecasting/tree/main/docs"
-Issues = "https://github.com/jshiriyev/data-driven-forecasting/issues"
-Changelog = "https://github.com/jshiriyev/data-driven-forecasting/releases"
+Homepage = "https://github.com/jshiriyev/production-data-analysis"
+Documentation = "https://github.com/jshiriyev/production-data-analysis/tree/main/docs"
+Issues = "https://github.com/jshiriyev/production-data-analysis/issues"
+Changelog = "https://github.com/jshiriyev/production-data-analysis/releases"
 
 [tool.setuptools]
 include-package-data = true
