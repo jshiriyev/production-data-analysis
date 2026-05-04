@@ -6,7 +6,7 @@ from scipy.special import expi
 
 from ._typecurve import TypeCurve
 
-class LineSource(TypeCurve):
+class DimensionlessLineSource(TypeCurve):
     """Calculates well bottomhole pressure in field units for the given
     constant flow rate oil production, single phase flow."""
 
