@@ -2,7 +2,8 @@ import numpy as np
 
 import numbers
 
-from .utils import ConduitSlice, AnnularConduit
+from ._conduit_slice import ConduitSlice
+from ._annular_conduit import AnnularConduit
 
 class SandTransport:
     """

@@ -1,6 +1,6 @@
 import logging
 
-from respy import Layer, Fluid
+from prodpy.resprops import Layer, Fluid
 
 class SolverObj():
 	"""Base solver of the diffusivity equation."""

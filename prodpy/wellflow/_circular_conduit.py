@@ -1,6 +1,6 @@
 import numpy as np
 
-from .circle_segment import CircleSegment
+from ._circle_segment import CircleSegment
 
 class CircularConduit:
     """

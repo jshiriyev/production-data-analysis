@@ -1,6 +1,6 @@
 import numpy as np
 
-from .circular_conduit import CircularConduit
+from ._circular_conduit import CircularConduit
 
 class AnnularConduit(CircularConduit):
 

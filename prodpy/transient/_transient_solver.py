@@ -5,17 +5,17 @@ import numpy as np
 from scipy import special
 
 from ._solver_object import SolverObj
-from ._radial_pormed import RadPorMed
+from ._porous_media import PorousMedia
 
 from ._result import Result
 
-class TransientState(RadPorMed,SolverObj):
+class TransientState(PorousMedia,SolverObj):
     """
     Transient solution of the diffusivity equation in radial coordinates using 
     the line source solution based on the exponential integral.
 
     Inherits from:
-        RadPorMed: Provides radial porous media properties.
+        PorousMedia: Provides radial porous media properties.
         SolverObj: Handles base solver configurations and behaviors.
 
     """
@@ -23,14 +23,14 @@ class TransientState(RadPorMed,SolverObj):
     def __init__(self,size:tuple,**kwargs):
         """
         Initializes the Transient solver by invoking the initializers of 
-        RadPorMed and SolverObj.
+        PorousMedia and SolverObj.
 
         Args:
-            size (float tuple): porous media size for RadPorMed.
+            size (float tuple): porous media size for PorousMedia.
             **kwargs: Keyword arguments for SolverObj.
 
         """
-        RadPorMed.__init__(self,size)
+        PorousMedia.__init__(self,size)
         SolverObj.__init__(self,**kwargs)
 
         self.tmax = None

@@ -4,7 +4,7 @@ from typing import TYPE_CHECKING
 if TYPE_CHECKING:
 	from lasio import LASFile
 
-class Allocate():
+class Allocation():
 
 	def __init__(self,lasfile=None):
 
@@ -21,7 +21,7 @@ class Allocate():
 				  the length of tuple will be len(tops)-1
 		"""
 
-		heights = allocate.heights(tops,perf)
+		heights = Allocation.heights(tops,perf)
 
 		perftop,perflow = perf
 
@@ -56,7 +56,7 @@ class Allocate():
 			if low<top:
 				interval = 0
 			elif len(kwargs)>0:
-				interval = allocate.nets((top,low),**kwargs)
+				interval = Allocation.nets((top,low),**kwargs)
 			else:
 				interval = low-top
 
@@ -147,7 +147,7 @@ if __name__ == "__main__":
 
 	file = lasfile(D,L)
 
-	H = allocate.nets(zone,1,file,"lid")
+	H = Allocation.nets(zone,1,file,"lid")
 
 	print(H)
 

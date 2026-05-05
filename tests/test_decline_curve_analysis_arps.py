@@ -5,17 +5,10 @@ import pytest
 from numpy.testing import assert_allclose
 
 # Adjust import path to your project
-try:
-    from prodpy.decline import Arps
-    from prodpy.decline import Exponential
-    from prodpy.decline import Harmonic
-    from prodpy.decline import Hyperbolic
-except Exception:
-    from _arps import Arps
-    from _exponential import Exponential
-    from _harmonic import Harmonic
-    from _hyperbolic import Hyperbolic
-
+from prodpy.decline import Arps
+from prodpy.decline import Exponential
+from prodpy.decline import Harmonic
+from prodpy.decline import Hyperbolic
 
 @pytest.fixture(params=["exponential", "harmonic", "hyperbolic"])
 def kind(request):

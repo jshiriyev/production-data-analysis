@@ -9,7 +9,7 @@ import matplotlib.pyplot as plt
 from matplotlib.axes import Axes
 from numpy.testing import assert_allclose
 
-from prodpy._decline import DCA
+from prodpy import DCA
 
 try:
     from prodpy.decline import Arps

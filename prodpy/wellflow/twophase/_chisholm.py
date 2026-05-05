@@ -2,10 +2,10 @@ import logging
 
 import numpy as np
 
-from respy import Fluid
+from prodpy.resprops import Fluid
 
-from .pressure_drop._pipe import Pipe
-from .pressure_drop._darcy_weisbach import DarcyWeisbach
+from .onephase._pipe import Pipe
+from .onephase._darcy_weisbach import DarcyWeisbach
 
 DarcyWeisbach.LOWER_REYNOLDS_LIMIT = 1000
 DarcyWeisbach.UPPER_REYNOLDS_LIMIT = 2000

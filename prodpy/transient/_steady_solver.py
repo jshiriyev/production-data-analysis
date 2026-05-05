@@ -1,17 +1,17 @@
 import numpy as np
 
 from ._solver_object import SolverObj
-from ._radial_pormed import RadPorMed
+from ._porous_media import PorousMedia
 
 from ._result import Result
 
-class SteadyState(RadPorMed,SolverObj):
+class SteadySolver(PorousMedia,SolverObj):
     """
     Steady state solution of the diffusivity equation in radial coordinates using 
     the line source solution based on the exponential integral.
 
     Inherits from:
-        RadPorMed: Provides radial porous media properties.
+        PorousMedia: Provides radial porous media properties.
         SolverObj: Handles base solver configurations and behaviors.
 
     """
@@ -21,11 +21,11 @@ class SteadyState(RadPorMed,SolverObj):
         diffusivity equation.
 
         Args:
-            size (float tuple): porous media size for RadPorMed.
+            size (float tuple): porous media size for PorousMedia.
             **kwargs: Keyword arguments for SolverObj.
 
         """
-        RadPorMed.__init__(self,size)
+        PorousMedia.__init__(self,size)
         SolverObj.__init__(self,**kwargs)
 
     @property
@@ -51,7 +51,7 @@ class SteadyState(RadPorMed,SolverObj):
             pinit (float, optional): Initial reservoir pressure. Defaults to None.
 
         Returns:
-            SteadyState: Returns self to allow for method chaining or deferred execution.
+            SteadySolver: Returns self to allow for method chaining or deferred execution.
         
         """
         self.well = well

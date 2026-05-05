@@ -2,11 +2,6 @@ import unittest
 
 import numpy as np
 
-if __name__ == "__main__":
-    import dirsetup
-
-import fluids
-
 class TestStateFormulation(unittest.TestCase):
 
     def test_fluid_incompressible(self):

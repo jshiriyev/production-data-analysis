@@ -2,8 +2,8 @@ from __future__ import annotations
 
 from dataclasses import dataclass
 
-from .circular_conduit import CircularConduit
-from .annular_conduit import AnnularConduit
+from ._circular_conduit import CircularConduit
+from ._annular_conduit import AnnularConduit
 
 @dataclass(slots=True, frozen=True)
 class ConduitSlice:

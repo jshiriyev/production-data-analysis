@@ -4,7 +4,7 @@ build-backend = "setuptools.build_meta"
 
 [project]
 name = "prodpy"
-version = "0.0.32"
+version = "0.0.1"
 description = "Production forecasting utilities and decline-curve analysis tools built around Arps models."
 readme = "README.md"
 requires-python = ">=3.10"
@@ -34,11 +34,14 @@ dependencies = [
 [project.optional-dependencies]
 dev = [
     "pytest",
+    "pytest-xdist",
     "ruff",
     "mypy"
 ]
 plots = [
-    "matplotlib"
+    "matplotlib",
+    "plotly",
+    "seaborn"
 ]
 
 [project.urls]
@@ -52,3 +55,12 @@ include-package-data = true
 
 [tool.setuptools.packages.find]
 include = ["prodpy*"]
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]
+norecursedirs = [
+    ".git",
+    ".pytest_cache",
+    "docs",
+    "pytest-cache-files-*"
+]

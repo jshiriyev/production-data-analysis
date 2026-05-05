@@ -1,8 +1,8 @@
 import copy
 
 from ._reservoir import Reservoir
-from ._phase import Phase
-from ._operation import Operation
+# from ._phase import Phase
+# from ._operation import Operation
 from ._cruncher import Cruncher
 
 class Model():
@@ -13,8 +13,8 @@ class Model():
 		self._M = M
 
 		self._reservoir  = Reservoir(**Reservoir.get(**kwargs))
-		self._phase      = Phase(**Phase.get(**kwargs))
-		self._operation  = Operation(**Operation.get(**kwargs))
+		# self._phase      = Phase(**Phase.get(**kwargs))
+		# self._operation  = Operation(**Operation.get(**kwargs))
 
 		self.update_fluid_volumes()
 

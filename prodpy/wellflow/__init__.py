@@ -1,7 +1,10 @@
-from . import pressure_drop as drop
+from . import onephase
+from . import sandtransport as sandy
 
-from .pressure_drop import Pipe, DarcyWeisbach, HazenWilliams
+from .onephase import DarcyWeisbach, HazenWilliams
+from .twophase import Mixture, LockhartMartinelli, Chisholm
 
-from ._mixture import Mixture
-from ._lockhart_martinelli import LockhartMartinelli
-from ._chisholm import Chisholm
+from ._pipe import Pipe
+from ._conduit_slice import ConduitSlice
+from ._circular_conduit import CircularConduit
+from ._annular_conduit import AnnularConduit

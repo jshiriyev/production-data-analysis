@@ -5,12 +5,7 @@ import pytest
 from numpy.testing import assert_allclose
 
 # ---- adjust this import to your module name/path ----
-try:
-    # e.g., if the class is in decline/hyperbolic.py
-    from prodpy.decline import Hyperbolic
-except Exception:
-    # fallback if it's just hyperbolic.py in the root
-    from _hyperbolic import Hyperbolic
+from prodpy.decline import Hyperbolic
 
 
 @pytest.fixture

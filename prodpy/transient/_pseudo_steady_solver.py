@@ -1,56 +1,36 @@
+from dataclasses import dataclass
 import logging
 
 import numpy as np
 
 from ._solver_object import SolverObj
-from ._radial_pormed import RadPorMed
+from ._porous_media import PorousMedia
 
 from ._result import Result
 
-@dataclass(frozen=True)
-class Boundary:
-
-    #shape factor, {C_A} value
-    factor: float
-
-    # PSS is exact for higher values
-    time_pss_accurate: float = None
-    # PSS gives less than 1% error for higher values
-    time_pss_error_prone: float = None
-    # Use infinite system solution with less than 1 % Error for lesser values
-    time_infinite: float = None
-
-class PseudoSteadyState(RadPorMed,SolverObj):
+class PseudoSteadyState(PorousMedia,SolverObj):
     """Pseudo Steady State solution based on shape factors.
 
     The solver is also applicable when there are two slightly compressible fluids
     where the second one is at irreducible saturation, not mobile.
     
     Inherits from:
-        RadPorMed: Provides radial porous media properties.
+        PorousMedia: Provides radial porous media properties.
         SolverObj: Handles base solver configurations and behaviors.
 
     """
-    GAMMA = np.exp(0.5772)
-
-    GEOMETRY = {
-        "circle": Boundary(31.62,0.1,0.06,0.1),
-        "triangle": Boundary(27.6,0.2,0.07,0.09),
-        "square": Boundary(30.8828,0.1,0.05,0.09),
-        "hexagon": Boundary(31.6,0.1,0.06,0.1),
-        }
 
     def __init__(self,size:tuple,**kwargs):
         """
         Initializes the Pseudo-State solver by invoking the initializers of 
-        RadPorMed and SolverObj.
+        PorousMedia and SolverObj.
 
         Args:
-            size (float tuple): porous media size for RadPorMed.
+            size (float tuple): porous media size for PorousMedia.
             **kwargs: Keyword arguments for SolverObj.
 
         """
-        RadPorMed.__init__(self,size)
+        PorousMedia.__init__(self,size)
         SolverObj.__init__(self,**kwargs)
 
     @property

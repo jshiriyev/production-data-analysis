@@ -2,10 +2,7 @@ import unittest
 
 import numpy as np
 
-if __name__ == "__main__":
-    import dirsetup
-
-from flow.pormed import RelPerm
+from prodpy.resprops import RelPerm
 
 class TestRelativePermeability(unittest.TestCase):
     

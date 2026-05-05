@@ -1,6 +1,5 @@
-from respy import Fluid
-
-from ._pipe import Pipe
+from prodpy.resprops import Fluid
+from prodpy.wellflow import Pipe
 
 class PressureDrop():
     """A base class for pressure drop calculations in a pipe due to fluid flow."""

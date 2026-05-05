@@ -1,6 +1,6 @@
-from ._radial_pormed import RadPorMed
+from ._porous_media import PorousMedia
 from ._linear_pormed import LinPorMed
 
 from ._transient_solver import TransientState
 from ._pseudo_steady_solver import PseudoSteadyState
-from ._steady_solver import SteadyState
+from ._steady_solver import SteadySolver
