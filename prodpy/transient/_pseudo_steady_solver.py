@@ -3,12 +3,12 @@ import logging
 
 import numpy as np
 
-from ._solver_object import SolverObj
+from ._base_solver import BaseSolver
 from ._porous_media import PorousMedia
 
 from ._result import Result
 
-class PseudoSteadyState(PorousMedia,SolverObj):
+class PseudoSteadyState(BaseSolver):
     """Pseudo Steady State solution based on shape factors.
 
     The solver is also applicable when there are two slightly compressible fluids
@@ -16,35 +16,21 @@ class PseudoSteadyState(PorousMedia,SolverObj):
     
     Inherits from:
         PorousMedia: Provides radial porous media properties.
-        SolverObj: Handles base solver configurations and behaviors.
+        BaseSolver: Handles base solver configurations and behaviors.
 
     """
 
-    def __init__(self,size:tuple,**kwargs):
+    def __init__(self, *args, **kwargs):
         """
         Initializes the Pseudo-State solver by invoking the initializers of 
-        PorousMedia and SolverObj.
+        PorousMedia and BaseSolver.
 
         Args:
             size (float tuple): porous media size for PorousMedia.
-            **kwargs: Keyword arguments for SolverObj.
+            **kwargs: Keyword arguments for BaseSolver.
 
         """
-        PorousMedia.__init__(self,size)
-        SolverObj.__init__(self,**kwargs)
-
-    @property
-    def vpore(self):
-        """Getter for the pore volume."""
-        if not hasattr(self,"_vpore"):
-            self.vpore = None
-
-        return self._vpore/(0.3048**3)
-
-    @vpore.setter
-    def vpore(self,value):
-        """Setter for the pore volume."""
-        self._vpore = self._volume*self.layer._poro
+        super().__init__(*args, **kwargs)
 
     def __call__(self,well,shape:str="circle",pinit:float=None):
         """

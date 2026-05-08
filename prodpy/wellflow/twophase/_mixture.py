@@ -1,7 +1,7 @@
 from prodpy.resprops import Fluid
 
-from .onephase._pipe import Pipe
-from .onephase._darcy_weisbach import DarcyWeisbach
+from prodpy.wellflow._pipe import Pipe
+from prodpy.wellflow.onephase._darcy_weisbach import DarcyWeisbach
 
 class Mixture():
 

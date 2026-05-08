@@ -4,49 +4,34 @@ import numpy as np
 
 from scipy import special
 
-from ._solver_object import SolverObj
-from ._porous_media import PorousMedia
+from ._base_solver import BaseSolver
 
 from ._result import Result
 
-class TransientState(PorousMedia,SolverObj):
+class TransientState(BaseSolver):
     """
     Transient solution of the diffusivity equation in radial coordinates using 
     the line source solution based on the exponential integral.
 
     Inherits from:
         PorousMedia: Provides radial porous media properties.
-        SolverObj: Handles base solver configurations and behaviors.
+        BaseSolver: Handles base solver configurations and behaviors.
 
     """
 
-    def __init__(self,size:tuple,**kwargs):
+    def __init__(self, *args, **kwargs):
         """
         Initializes the Transient solver by invoking the initializers of 
-        PorousMedia and SolverObj.
+        PorousMedia and BaseSolver.
 
         Args:
             size (float tuple): porous media size for PorousMedia.
-            **kwargs: Keyword arguments for SolverObj.
+            **kwargs: Keyword arguments for BaseSolver.
 
         """
-        PorousMedia.__init__(self,size)
-        SolverObj.__init__(self,**kwargs)
+        super().__init__(*args, **kwargs)
 
         self.tmax = None
-
-    @property
-    def vpore(self):
-        """Getter for the pore volume."""
-        if not hasattr(self,"_vpore"):
-            self.vpore = None
-
-        return self._vpore/(0.3048**3)
-
-    @vpore.setter
-    def vpore(self,value):
-        """Setter for the pore volume."""
-        self._vpore = self._volume*self.layer._poro
 
     def __call__(self,well,pinit:float=None):
         """

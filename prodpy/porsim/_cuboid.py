@@ -7,32 +7,32 @@ from ._builder import Builder
 class Cuboid(Builder):
     """Rectangular Cuboid class"""
 
-    def __init__(self,grids,rrock,fluid,tcomp=None):
+    def __init__(self,grids,layer,fluid,tcomp=None):
         """Initialization of block (cell) calculation class."""
         super().__init__(grids)
 
-        self.rrock = rrock
+        self.layer = layer
         self.fluid = fluid
 
         self._tcomp,self.tcomp = None,tcomp
 
-    def __call__(self,rrock=None,fluid=None,tcomp=None):
+    def __call__(self,layer=None,fluid=None,tcomp=None):
         """Returns the instance with updated rock and fluid properties."""
-        self.rrock = rrock # reservoir rock properties
+        self.layer = layer # reservoir rock properties
         self.fluid = fluid # reservoir fluid properties
         self.tcomp = tcomp # total compressibility
 
     @property
-    def rrock(self):
-        return self._rrock
+    def layer(self):
+        return self._layer
     
-    @rrock.setter
-    def rrock(self,value):
+    @layer.setter
+    def layer(self,value):
         """Sets the reservoir rock permeability and transmissibility into the cell."""
         if value is None:
             return
 
-        self._rrock = value
+        self._layer = value
 
         # Reset flow properties to indicate they need recalculation
         self.xflow = None # Block transmissibility in x-direction
@@ -47,7 +47,7 @@ class Cuboid(Builder):
     @xflow.setter
     def xflow(self,value):
         """Setter for the rock transmissibility in x-direction."""
-        self._xflow = (self.rrock._xperm*self._xarea)/(self._xdelta)
+        self._xflow = (self.layer._xperm*self._xarea)/(self._xdelta)
 
     @property
     def yflow(self):
@@ -57,7 +57,7 @@ class Cuboid(Builder):
     @yflow.setter
     def yflow(self,value):
         """Setter for the rock transmissibility in y-direction."""
-        self._yflow = (self.rrock._yperm*self._yarea)/(self._ydelta)
+        self._yflow = (self.layer._yperm*self._yarea)/(self._ydelta)
 
     @property
     def zflow(self):
@@ -67,7 +67,7 @@ class Cuboid(Builder):
     @zflow.setter
     def zflow(self,value):
         """Setter for the rock transmissibility in z-direction."""
-        self._zflow = (self.rrock._zperm*self._zarea)/(self._zdelta)
+        self._zflow = (self.layer._zperm*self._zarea)/(self._zdelta)
 
     @property
     def fluid(self):
@@ -129,7 +129,7 @@ class Cuboid(Builder):
         """Setter for the total compressibility."""
         if value is None:
             try:
-                self._tcomp = self.rrock._comp+self.fluid._comp
+                self._tcomp = self.layer._comp+self.fluid._comp
             except Exception as e:
                 logging.warning(f"Missing attribute when calculating total compressibility: {e}")
         else:

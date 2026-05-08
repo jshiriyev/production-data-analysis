@@ -1,10 +1,10 @@
 from prodpy.resprops import Fluid
-from prodpy.wellflow import Pipe
+from prodpy.wellflow._pipe import Pipe
 
 class PressureDrop():
     """A base class for pressure drop calculations in a pipe due to fluid flow."""
 
-    def __init__(self,pipe:Pipe,fluid:Fluid):
+    def __init__(self,pipe,fluid:Fluid):
         """
         Initializes the PressureDrop class.
 
