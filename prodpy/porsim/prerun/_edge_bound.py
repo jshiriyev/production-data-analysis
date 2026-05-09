@@ -1,4 +1,4 @@
-from ._const import Constraint
+from ._constraint import Constraint
 
 class EdgeBound(Constraint):
     """
@@ -44,7 +44,7 @@ if __name__ == "__main__":
 
     bcond = EdgeBound("xmin",press=500)
 
-    print(bcond.cond)
+    print(bcond.limit)
     print(bcond.face)
     print(bcond.axis)
-    print(bcond.sort)
+    print(bcond.mode)

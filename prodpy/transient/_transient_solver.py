@@ -78,6 +78,19 @@ class TransientState(BaseSolver):
     def tmax(self):
         """Getter for the maximum time limit for the transient solution because of the finite reservoir size."""
         return self._tmax/(24*60*60)
+    
+
+    @property
+    def twell(self):
+        return (self.wcond.radius**2)/(self.diffuse)*15802
+
+    @property
+    def tedge(self):
+        return (self.rrock.radius**2)/(self.diffuse)*39.5
+    
+
+
+
 
     @tmax.setter
     def tmax(self,tmax=None):
@@ -128,6 +141,13 @@ class TransientState(BaseSolver):
         valids = np.logical_and(bound_internal,bound_external)
 
         return np.where(valids,times,np.nan)
+    
+    @staticmethod
+    def press_nondim(self,time_nondim):
+
+        Ei = expi(-39.5*(self.wcond.radius**2)/(self.diffuse*times))
+
+        return self.pzero-self.pcons*(1/2*Ei-self.wcond.skin)
 
 if __name__ == "__main__":
 

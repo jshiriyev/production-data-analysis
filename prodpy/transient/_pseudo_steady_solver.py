@@ -139,3 +139,17 @@ class PseudoSteadyState(BaseSolver):
             logging.warning("Not all times satisfy the early time limits!")
 
         return np.where(boundary,values,np.nan)
+    
+    def pseudosteady(self,times):
+        """
+        Sets the radius of outer circular boundary, ft and calculates
+        pseudo steady state solution correcting pressure for boundary effects.
+        
+        If area is not None, the radius is calculated from area [acre].
+        """
+
+        term_well = -0.012648*(self.diffuse*times)/self.wcond.radius**2
+
+        term_edge = -numpy.log(self.rrock.radius/self.wcond.radius)
+
+        return self.pzero-self.pcons*(term_well+term_edge+3/4-self.wcond.skin)

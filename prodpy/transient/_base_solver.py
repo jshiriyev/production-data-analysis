@@ -125,3 +125,28 @@ class BaseSolver(PorousMedia):
 		"""Pore volume in m3."""
 		return self._volume*self.layer._poro
 	
+	def tD(self):
+		return (self.diffuse*self.time.times)/(self.wcond.radius**2)*0.00633
+
+	def CD(self):
+		vpore = self.rrock.poro*self.rrock.height*self.wcond.radius**2
+
+		return (self.storage)/(vpore*self.ccomp)*0.8936
+
+	def pD(self,press):
+		return (self.pzero-press)/self.pcons*141.2
+	
+
+
+
+	@property
+	def storage(self):
+		return (self.wcond.area)/(self.fluid.rho)*144/5.615
+
+	@property
+	def pcons(self):
+		return (self.wcond.rate)/(self.fluid.mobil*self.layer.perm*self.layer.height)*141.2
+	
+
+
+	

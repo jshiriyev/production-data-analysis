@@ -1,4 +1,4 @@
-from ._const import Constraint
+from ._constraint import Constraint
 
 class WellBound(Constraint):
     """
@@ -75,9 +75,9 @@ if __name__ == "__main__":
 
     print(well.axis)
     print(well._axis)
-    print(well.sort)
-    print(well.cond)
-    print(well._cond)
+    print(well.mode)
+    print(well.limit)
+    print(well._limit)
 
     print(well.start)
     print(well._start)

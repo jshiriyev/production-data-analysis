@@ -97,7 +97,7 @@ class Filler:
     @staticmethod
     def jmatrix(matrix:csr,constr):
         """Returns updated J diagonal matrix."""
-        if constr.sort=="press":
+        if constr.mode=="press":
             vector = (constr._prod,(constr.index,constr.index))
             matrix = csr(vector,shape=matrix.shape)
 
@@ -106,9 +106,9 @@ class Filler:
     @staticmethod
     def qmatrix(matrix:csr,constr):
         """Returns updated Q column matrix."""
-        vector = constr._prod*constr._cond
+        vector = constr._prod*constr._limit
 
-        if constr.sort!="press":
+        if constr.mode!="press":
             vector /= constr._prod.sum()
 
         vector = (vector,(constr.index,numpy.zeros_like(constr.index)))
