@@ -46,40 +46,12 @@ class PseudoSteadyState(BaseSolver):
             PseudoSteadyState: Returns self to allow for method chaining or deferred execution.
         
         """
-
-        self.well  = well
-        self.shape = shape
         self.tmin  = None
         self.term  = None
 
         self.pinit = pinit
         
         return self
-
-    @property
-    def well(self):
-        """Getter for the well item."""
-        return self._well
-    
-    @well.setter
-    def well(self,value):
-        """Setter for the well item."""
-        self._well = value
-
-    @property
-    def shape(self):
-        """Getter for the reservoir boundary shape."""
-        return self._shape
-
-    @shape.setter
-    def shape(self,value):
-        """Setter for the reservoir boundary shape."""
-        self._shape = value
-
-    @property
-    def bound(self):
-        """Getter for the reservoir shape parameters."""
-        return self.GEOMETRY[self.shape]
 
     @property
     def tmin(self):
@@ -90,34 +62,6 @@ class PseudoSteadyState(BaseSolver):
     def tmin(self,value):
         """Setter for the minimum time where PSS solution is applicable."""
         self._tmin = self.dim2t(self.bound.time_pss_accurate)*(24*60*60)
-
-    def t2dim(self,values:np.ndarray):
-        """Converts time values to dimensionless time values."""
-        return (self._hdiff/self._surface)*np.asarray(values)*(24*60*60)
-
-    def dim2t(self,values:np.ndarray):
-        """Converts dimensionless time values to time values."""
-        return (self._surface/self._hdiff)*np.asarray(values)/(24*60*60)
-
-    @property
-    def term(self):
-        """Getter for the pressure term used in analytical equations."""
-        return self._term/6894.76
-
-    @term.setter
-    def term(self,value):
-        """Setter for the pressure term used in analytical equations."""
-        self._term = (self.well._cond)/(2*np.pi*self._flow*self.fluid._mobil)
-
-    @property
-    def pinit(self):
-        """Getter for the initial reservoir pressure."""
-        return self._pinit/6894.76
-
-    @pinit.setter
-    def pinit(self,values):
-        """Setter for the initial reservoir pressure."""
-        self._pinit = np.ravel(value).astype(float)*6894.76
 
     def solve(self,times,nodes):
         """Solves for the pressure values at pseudo-steady state."""

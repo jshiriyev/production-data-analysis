@@ -55,16 +55,6 @@ class TransientState(BaseSolver):
         return self
 
     @property
-    def well(self):
-        """Getter for the well item."""
-        return self._well
-    
-    @well.setter
-    def well(self,value):
-        """Setter for the well item."""
-        self._well = value
-
-    @property
     def tmin(self):
         """Getter for the minimum time limit for the transient solution because of the finite wellbore size."""
         return self._tmin/(24*60*60)

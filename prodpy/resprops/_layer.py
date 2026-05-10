@@ -186,6 +186,31 @@ class Layer():
 	def zperm(self):
 		"""Getter for the reservoir permeability in z-direction."""
 		return self._zperm/self.MD_TO_M2
+	
+	@property
+	def is_isotropic(self) -> bool:
+		"""
+		Return True if the layer permeability is isotropic.
+
+		A layer is considered isotropic when the directional permeabilities are
+		equal cell-by-cell:
+
+			xperm == yperm == zperm
+
+		If all three directional permeabilities are NaN for the same cell,
+		that cell is treated as consistently undefined and does not make the
+		layer anisotropic.
+
+		Returns
+		-------
+		bool
+			True if x-, y-, and z-direction permeabilities are equal for every
+			cell, including matching NaN triplets; otherwise False.
+		"""
+		return bool(
+			np.allclose(self._xperm, self._yperm, rtol=1e-12, atol=0.0, equal_nan=True)
+			and np.allclose(self._xperm, self._zperm, rtol=1e-12, atol=0.0, equal_nan=True)
+		)
 
 	@property
 	def size(self):

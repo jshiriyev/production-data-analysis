@@ -46,36 +46,6 @@ class SteadySolver(BaseSolver):
 
         return self
 
-    @property
-    def well(self):
-        """Getter for the well item."""
-        return self._well
-    
-    @well.setter
-    def well(self,value):
-        """Setter for the well item."""
-        self._well = value
-
-    @property
-    def term(self):
-        """Getter for the pressure term used in analytical equations."""
-        return self._term/6894.76
-
-    @term.setter
-    def term(self,value):
-        """Setter for the pressure term used in analytical equations."""
-        self._term = (self.well._cond)/(2*np.pi*self._flow*self.fluid._mobil)
-
-    @property
-    def pinit(self):
-        """Getter for the initial reservoir pressure."""
-        return self._pinit/6894.76
-
-    @pinit.setter
-    def pinit(self,values):
-        """Setter for the initial reservoir pressure."""
-        self._pinit = np.ravel(value).astype(float)*6894.76
-
     def solve(self,times,nodes):
         """Solves for the pressure values at steady state."""
         result = Result(self.correct(times),nodes)

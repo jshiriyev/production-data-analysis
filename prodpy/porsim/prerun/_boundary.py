@@ -1,6 +1,6 @@
 from ._constraint import Constraint
 
-class EdgeBound(Constraint):
+class Boundary(Constraint):
     """
     Represents the edges of reservoir in the simulator.
     """

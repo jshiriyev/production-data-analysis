@@ -2,8 +2,8 @@ import numpy as np
 import pytest
 
 from prodpy.porsim.prerun._constraint import Constraint
-from prodpy.porsim.prerun._edge_bound import EdgeBound
-from prodpy.porsim.prerun._well_bound import WellBound
+from prodpy.porsim.prerun._boundary import Boundary
+from prodpy.porsim.prerun._borehole import Borehole
 
 
 @pytest.mark.parametrize(
@@ -120,19 +120,124 @@ def test_constraint_invalid_time_window_raises(kwargs, message):
         Constraint(**kwargs)
 
 
-def test_well_bound_initializes_constraint_and_well_properties():
-    well = WellBound((0, 1), axis="z", radius=0.25, skin=2.0, press=4000.0)
+def test_borehole_initializes_well_properties():
+    well = Borehole(index=(0, 1), axis="z", radius=0.25, skin=2.0)
 
     assert well.index == (0, 1)
     assert well.axis == "z"
     assert well.radius == pytest.approx(0.25)
     assert well.skin == pytest.approx(2.0)
-    assert well.mode == "press"
-    assert well.limit == pytest.approx(4000.0)
+    assert well.constraints == ()
+
+
+def test_borehole_adds_constraints_from_objects_and_kwargs_sorted_by_start():
+    well = Borehole(
+        index=(0, 1),
+        constraints=[
+            Constraint(start=10.0, stop=20.0, press=3000.0),
+            Constraint(start=0.0, stop=10.0, orate=1000.0),
+        ],
+    )
+
+    added = well.add_constraint(start=20.0, wrate=500.0)
+
+    assert [constraint.start for constraint in well.constraints] == [0.0, 10.0, 20.0]
+    assert well.constraints[-1] is added
+    assert well.active_constraint(5.0).mode == "orate"
+    assert well.active_constraint(10.0).mode == "press"
+    assert well.active_constraint(20.0).mode == "wrate"
+
+
+def test_borehole_rejects_overlapping_constraints():
+    well = Borehole(constraints=[Constraint(start=0.0, stop=10.0, orate=1000.0)])
+
+    with pytest.raises(ValueError, match="overlaps with an existing constraint"):
+        well.add_constraint(start=9.0, stop=20.0, press=3000.0)
+
+
+def test_borehole_allows_touching_half_open_constraints():
+    well = Borehole()
+
+    well.add_constraint(start=0.0, stop=10.0, orate=1000.0)
+    well.add_constraint(start=10.0, stop=20.0, press=3000.0)
+
+    assert well.validate_schedule()
+    assert well.active_constraint(9.999).mode == "orate"
+    assert well.active_constraint(10.0).mode == "press"
+
+
+def test_borehole_rejects_overlapping_open_ended_constraints():
+    well = Borehole(constraints=[Constraint(start=5.0, orate=1000.0)])
+
+    with pytest.raises(ValueError, match="overlaps with an existing constraint"):
+        well.add_constraint(start=10.0, press=3000.0)
+
+
+@pytest.mark.parametrize(
+    ("kwargs", "error_type", "message"),
+    [
+        ({"index": []}, TypeError, "index must be a tuple or None"),
+        ({"index": ()}, ValueError, "index cannot be an empty tuple"),
+        ({"index": (1, "2")}, TypeError, "all index values must be integers"),
+        ({"axis": "u"}, ValueError, "axis must be one of"),
+        ({"axis": 1}, TypeError, "axis must be a string"),
+        ({"radius": 0.0}, ValueError, "radius must be positive"),
+        ({"radius": "bad"}, ValueError, "radius must be convertible to float"),
+        ({"skin": "bad"}, ValueError, "skin must be convertible to float"),
+    ],
+)
+def test_borehole_invalid_properties_raise(kwargs, error_type, message):
+    with pytest.raises(error_type, match=message):
+        Borehole(**kwargs)
+
+
+def test_borehole_constraints_are_read_only_tuple_snapshot():
+    well = Borehole()
+    constraint = well.add_constraint(press=4000.0)
+
+    constraints = well.constraints
+
+    assert constraints == (constraint,)
+    with pytest.raises(AttributeError):
+        constraints.append(Constraint(start=1.0, orate=100.0))
+
+
+def test_borehole_schedule_and_change_times():
+    well = Borehole(
+        constraints=[
+            Constraint(start=0.0, stop=10.0, orate=1000.0),
+            Constraint(start=10.0, press=3000.0),
+        ],
+    )
+
+    schedule = well.schedule()
+    rows = schedule.to_dict("records") if hasattr(schedule, "to_dict") else schedule
+
+    assert rows[0] == {
+        "index": 0,
+        "start_days": 0.0,
+        "stop_days": 10.0,
+        "mode": "orate",
+        "limit": 1000.0,
+        "unit": "bbl/day",
+    }
+    assert rows[1]["index"] == 1
+    assert rows[1]["start_days"] == 10.0
+    assert rows[1]["stop_days"] is None or np.isnan(rows[1]["stop_days"])
+    assert rows[1]["mode"] == "press"
+    assert rows[1]["limit"] == 3000.0
+    assert rows[1]["unit"] == "psi"
+    assert well.change_times() == [0.0, 10.0]
+
+
+def test_borehole_repr_uses_index_not_missing_well_attribute():
+    well = Borehole(index=(0, 1), constraints=[Constraint(press=4000.0)])
+
+    assert repr(well) == "Borehole(index=(0, 1), radius=0.5 ft, skin=0, constraints=1)"
 
 
 def test_edge_bound_initializes_constraint_and_face_properties():
-    edge = EdgeBound("xmin", press=500.0)
+    edge = Boundary("xmin", press=500.0)
 
     assert edge.face == "xmin"
     assert edge.axis == "x"
