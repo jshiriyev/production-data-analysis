@@ -53,6 +53,18 @@ class Constraint():
         self.stop   = stop
         self.set_limit(**kwargs)
 
+    def __repr__(self) -> str:
+        """Return a constructor-style representation of the constraint."""
+        stop = "None" if self.stop is None else f"{self.stop:g}"
+
+        return (
+            f"{type(self).__name__}("
+            f"start={self.start:g}, "
+            f"stop={stop}, "
+            f"{self.mode}={self.limit:g}"
+            f")"
+        )
+
     def set_limit(self, **kwargs):
 
         constraint  = {key:value for key,value in kwargs.items() if value is not None}

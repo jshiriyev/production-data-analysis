@@ -59,11 +59,14 @@ class Fluid():
         rperm   : float or array-like of floats, optional
             Relative permeability value (dimensionless).
 
+        size   : int, optional
+            Expected size of array-like properties. If provided,
+            all array-like properties must match this size.
+
         """
         self.size  = size
 
-        self.visc  = visc
-        
+        self.visc  = visc        
         self.rho   = rho
         self.comp  = comp
         self.fvf   = fvf
@@ -71,6 +74,21 @@ class Fluid():
         self.press = press
         self.satur = satur
         self.rperm = rperm
+
+    def __repr__(self):
+        """Return a concise constructor-style representation of the fluid."""
+
+        args = [
+            f"visc={Layer._repr_value(self.visc)}",
+            f"rho={Layer._repr_value(self.rho)}",
+            f"comp={Layer._repr_value(self.comp)}",
+            f"fvf={Layer._repr_value(self.fvf)}",
+            f"press={Layer._repr_value(self.press)}",
+            f"satur={Layer._repr_value(self.satur)}",
+            f"rperm={Layer._repr_value(self.rperm)}",
+        ]
+
+        return f"{type(self).__name__}({', '.join(args)})"
 
     @property
     def visc(self):
@@ -182,6 +200,3 @@ if __name__ == "__main__":
 
     print(f.comp)
     print(f.mobil)
-
-
-    

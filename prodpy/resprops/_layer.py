@@ -3,20 +3,20 @@ import numpy as np
 class Layer():
 	"""
 	Reservoir porous-media properties with oilfield-unit public access
-    and SI-unit internal storage for the given pressure and temperature.
+	and SI-unit internal storage for the given pressure and temperature.
 
 	Public properties use oilfield units:
-    xperm, yperm, zperm, perm : mD
-    comp : 1/psi
-    press : psi
+	xperm, yperm, zperm, perm : mD
+	comp : 1/psi
+	press : psi
 
-    Internal underscored properties use SI units:
-    _xperm, _yperm, _zperm, _perm : m2
-    _comp : 1/Pa
-    _press : Pa
+	Internal underscored properties use SI units:
+	_xperm, _yperm, _zperm, _perm : m2
+	_comp : 1/Pa
+	_press : Pa
 
 	Permeability, porosity, compressibility, and pressure may be scalar
-    or array-like. Array-like values represent grid-cell properties.
+	or array-like. Array-like values represent grid-cell properties.
 	"""
 	MD_TO_M2 = 9.869233e-16
 	PSI_TO_PA = 6894.757293168
@@ -38,6 +38,14 @@ class Layer():
 		press   : float or np.ndarray of floats, optional
 			Pressure at which properties are defined, psi
 
+		allow_inf : bool, optional
+			Whether to allow positive or negative infinity values in permeability,
+			porosity, compressibility, or pressure. Default is False.
+		
+		allow_nan : bool, optional
+			Whether to allow NaN values in permeability, porosity, compressibility,
+			or pressure. Default is True.
+
 		"""
 		self.settings = {
 			"allow_inf": allow_inf,
@@ -49,6 +57,62 @@ class Layer():
 		self.poro = poro
 		self.comp = comp
 		self.press = press
+
+	def __repr__(self):
+		"""Return a concise constructor-style representation of the layer."""
+
+		if self.is_isotropic:
+			args = [
+				f"perm={self._repr_value(self.xperm)}",
+				f"is_isotropic=True",
+			]
+		else:
+			args = [
+				f"xperm={self._repr_value(self.xperm)}",
+				f"yperm={self._repr_value(self.yperm)}",
+				f"zperm={self._repr_value(self.zperm)}",
+			]
+
+		args.extend([
+			f"poro={self._repr_value(self.poro)}",
+			f"comp={self._repr_value(self.comp)}",
+			f"press={self._repr_value(self.press)}",
+		])
+
+		return f"{type(self).__name__}({', '.join(args)})"
+	
+	@staticmethod
+	def _repr_value(value):
+		"""Format scalar and array values for __repr__."""
+
+		if value is None:
+			return "None"
+
+		arr = np.asarray(value)
+
+		if arr.size == 1:
+			scalar = float(arr.ravel()[0])
+
+			if np.isnan(scalar):
+				return "np.nan"
+			if np.isposinf(scalar):
+				return "np.inf"
+			if np.isneginf(scalar):
+				return "-np.inf"
+
+			return repr(scalar)
+
+		return (
+			"np.array("
+			+ np.array2string(
+				arr,
+				precision=6,
+				separator=", ",
+				threshold=8,
+				edgeitems=2,
+			)
+			+ ")"
+		)
 
 	def set_permeability(self,xperm,*,yperm=None,zperm=None,yreduce:float=1.,zreduce:float=1.):
 		"""
