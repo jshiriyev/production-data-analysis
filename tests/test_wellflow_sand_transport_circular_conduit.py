@@ -2,7 +2,7 @@ import math
 
 import pytest
 
-from sandy.utils import CircularConduit
+from prodpy.wellflow import CircularConduit
 
 
 @pytest.mark.parametrize("diameter", [-1, -10.5])

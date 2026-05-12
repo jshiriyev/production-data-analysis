@@ -1,8 +1,8 @@
 import numpy as np
 
-from ._stones_I import StonesI
+from ._stone_model_I import StoneModelI
 
-class StonesII(StonesI):
+class StoneModelII(StoneModelI):
     """
     This Model Provides IMBIBITION Relative Permeability MODELS for a THREE-PHASE system.
 
@@ -46,6 +46,6 @@ class StonesII(StonesI):
 
 if __name__ == "__main__":
 
-    rp = StonesII(swr=0.15,sor_ow=0.15,sor_go=0.05,sgr=0.1,k0rw=0.3,k0ro_ow=0.88,k0ro_go=0.8,k0rg=0.3)
+    rp = StoneModelII(swr=0.15,sor_ow=0.15,sor_go=0.05,sgr=0.1,k0rw=0.3,k0ro_ow=0.88,k0ro_go=0.8,k0rg=0.3)
 
     print(rp.kro(0.030,0.406,0.175,0.035))

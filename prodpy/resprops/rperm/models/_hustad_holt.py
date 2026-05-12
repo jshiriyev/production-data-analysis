@@ -1,8 +1,8 @@
 import numpy as np
 
-from ._stones_I import StonesI
+from ._stone_model_I import StoneModelI
 
-class HustadHolt(StonesI):
+class HustadHolt(StoneModelI):
     """
     This Model Provides IMBIBITION Relative Permeability MODELS for a THREE-PHASE system.
 

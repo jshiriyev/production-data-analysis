@@ -4,13 +4,25 @@ class WyllieGardner():
 
 		self.swc = swc # connate (irreducible) water saturation
 
+	@property
+	def sostar(self):
+		return self._sostar
+
 	@sostar.setter
 	def sostar(self,so):
 		self._sostar = so/(1-self.swc)
 
+	@property
+	def swstar(self):
+		return self._swstar
+
 	@swstar.setter
 	def swstar(self,sw):
 		self._swstar = (sw-self.swc)/(1-self.swc)
+
+	@property
+	def sgstar(self):
+		return self._sgstar
 
 	@sgstar.setter
 	def sgstar(self,sg):

@@ -1,5 +1,3 @@
-from .models._brooks_corey import BrooksCorey
-
-from .models._stones_I import StonesI
-from .models._stones_II import StonesII
-from .models._hustad_holt import HustadHolt
+from ._oil_water import OilWater
+from ._gas_oil import GasOil
+from ._three_phase import ThreePhase

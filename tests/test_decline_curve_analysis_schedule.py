@@ -4,8 +4,6 @@ import numpy as np
 import pandas as pd
 import pytest
 
-# 🔁 Adjust this import to your project structure:
-# from prodpy.decline.schedule import Schedule
 from prodpy import Schedule  # e.g., if Schedule is in schedule.py next to tests
 
 

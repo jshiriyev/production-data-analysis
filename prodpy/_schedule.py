@@ -85,8 +85,8 @@ class Schedule:
 		"""Vectorized (series - ref) in days as float64."""
 		ref_ts = pd.to_datetime(ref)  # robust parse
 		# ns since epoch for both sides (avoid Series.view deprecation)
-		s_ns = self._series.astype("int64", copy=False).to_numpy()
 		ref_ns = pd.Timestamp(ref_ts).value
+		s_ns = self._series.astype("int64").to_numpy()
 		return (s_ns - ref_ns).astype("float64") / 86_400_000_000_000.0 # 24*60*60*1e9
 
 	# def _days_between(self, ref: DateLike) -> np.ndarray:
