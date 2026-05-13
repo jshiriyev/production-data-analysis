@@ -1,4 +1,4 @@
-# reservoir rock and fluid properties
+from .rectangular._rect_grids import RectGrids
 
 from ._builder import Builder, Filler
 from ._cuboid import Cuboid

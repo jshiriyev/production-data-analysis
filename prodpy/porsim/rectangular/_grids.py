@@ -1,206 +1,274 @@
-import numpy
+import numpy as np
 
-from ._base import GridBase
+class Grids:
+	"""
+	Internal flattened grid container for reservoir simulation.
 
-class Grids(GridBase):
-    """Represents a structured reservoir grid with additional table attribute."""
+	`Grids` is produced by `RectGrids.grids` and expects already-expanded
+	per-cell arrays in oilfield units plus a precomputed neighbor table. It keeps
+	only lightweight internal shape checks; user-facing validation belongs to
+	`RectGrids`.
+	"""
+	FEET_TO_METERS = 0.3048
 
-    def __init__(self,xdelta:numpy.ndarray,ydelta:numpy.ndarray,zdelta:numpy.ndarray,depths:numpy.ndarray,table:numpy.ndarray):
-        """
-        Initialize the grid with spatial discretization and associated table data.
+	def __init__(
+		self,
+		xdelta: np.ndarray,
+		ydelta: np.ndarray,
+		zdelta: np.ndarray,
+		depths: np.ndarray,
+		table: np.ndarray,
+	):
+		"""
+		Initialize flattened per-cell grid data.
 
-        Parameters:
-        xdelta (np.ndarray): Grid cell sizes in the x-direction (feet).
-        ydelta (np.ndarray): Grid cell sizes in the y-direction (feet).
-        zdelta (np.ndarray): Grid cell sizes in the z-direction (feet).
+		Parameters
+		----------
+		xdelta : np.ndarray
+			Per-cell grid sizes in the x-direction (feet), shape = (nums,).
+		ydelta : np.ndarray
+			Per-cell grid sizes in the y-direction (feet), shape = (nums,).
+		zdelta : np.ndarray
+			Per-cell grid sizes in the z-direction (feet), shape = (nums,).
+		depths : np.ndarray
+			Per-cell top-face depths (feet), shape = (nums,).
+		table : np.ndarray
+			Neighbor table with shape = (nums, 2*dims), where dims is 1, 2, or 3.
 
-        depths (np.ndarray): Grid depths (feet).
+		"""
+		self._xdelta = self._to_si_units(xdelta)
+		self._ydelta = self._to_si_units(ydelta)
+		self._zdelta = self._to_si_units(zdelta)
+		self._depths = self._to_si_units(depths)
+		self._table = np.asarray(table,dtype=np.int_)
 
-        table  (np.ndarray): Data table mapping the neighbors of each grid, integers.
+		self._check_internal_shapes()
 
-        """
-        super().__init__(xdelta,ydelta,zdelta,depths)
+	@classmethod
+	def _to_si_units(cls, array: np.ndarray) -> np.ndarray:
+		"""Convert an oilfield unit array in feet to SI units in meters."""
+		return np.asarray(array,dtype=float) * cls.FEET_TO_METERS
+	
+	@classmethod
+	def _to_field_units(cls, array: np.ndarray) -> np.ndarray:
+		"""Convert an SI array in meters to oilfield units in feet."""
+		return array / cls.FEET_TO_METERS
 
-        self.xarea  = None # Placeholder for volume calculations
-        self.yarea  = None # Placeholder for volume calculations
-        self.zarea  = None # Placeholder for volume calculations
+	def _check_internal_shapes(self) -> None:
+		"""Check constructor-only invariants for flattened simulation arrays."""
+		arrays = (self._xdelta,self._ydelta,self._zdelta,self._depths)
+		if any(array.ndim != 1 for array in arrays):
+			raise ValueError("Grids expects flattened one-dimensional arrays.")
 
-        self.volume = None # Placeholder for volume calculations
+		if len({array.shape for array in arrays}) != 1:
+			raise ValueError("Grids arrays must have matching per-cell shapes.")
 
-        self.table  = table
+		if (
+			self._table.ndim != 2
+			or self._table.shape[0] != self._xdelta.size
+			or self._table.shape[1] not in {2,4,6}
+		):
+			raise ValueError("table must have shape (nums, 2*dims) for dims 1, 2, or 3.")
 
-    @property
-    def delta(self):
-        """Returns the cell sizes in x, y, and z direction, shape = (nums,3)."""
-        return numpy.column_stack(
-            (self.xdelta,self.ydelta,self.zdelta)
-            )
+	def __repr__(self) -> str:
+		return f"{self.__class__.__name__}(nums={self.nums}, dims={self.dims})"
 
-    @property
-    def xarea(self):
-        return self._xarea*10.7639
+	@property
+	def xdelta(self):
+		"""Returns per-cell x-direction grid sizes in feet."""
+		return self._to_field_units(self._xdelta)
 
-    @xarea.setter
-    def xarea(self,value):
-        self._xarea = self._ydelta*self._zdelta
+	@property
+	def ydelta(self):
+		"""Returns per-cell y-direction grid sizes in feet."""
+		return self._to_field_units(self._ydelta)
 
-    @property
-    def yarea(self):
-        return self._yarea*10.7639
+	@property
+	def zdelta(self):
+		"""Returns per-cell z-direction grid sizes in feet."""
+		return self._to_field_units(self._zdelta)
 
-    @yarea.setter
-    def yarea(self,value):
-        self._yarea = self._zdelta*self._xdelta
+	@property
+	def depths(self):
+		"""Returns per-cell top-face depths in feet."""
+		return self._to_field_units(self._depths)
 
-    @property
-    def zarea(self):
-        return self._zarea*10.7639
+	@property
+	def table(self):
+		"""Returns the neighbor table for flattened grid cells."""
+		return self._table
 
-    @zarea.setter
-    def zarea(self,value):
-        self._zarea = self._xdelta*self._ydelta
-    
-    @property
-    def volume(self):
-        """Returns the volume of grids in field units."""
-        return self._volume*35.3147
+	@property
+	def xarea(self):
+		return self._xarea / self.FEET_TO_METERS**2
 
-    @volume.setter
-    def volume(self,value):
-        """Calculates the volume of each cell."""
-        self._volume = numpy.prod((self._xdelta,self._ydelta,self._zdelta),axis=0)
+	@property
+	def _xarea(self):
+		return self._ydelta*self._zdelta
 
-    @property
-    def nums(self):
-        """Returns total number of grids."""
-        return self.table.shape[0]
+	@property
+	def yarea(self):
+		return self._yarea / self.FEET_TO_METERS**2
 
-    @property
-    def dims(self):
-        """Returns the flow dimensions."""
-        return int(self.table.shape[1]/2)
+	@property
+	def _yarea(self):
+		return self._zdelta*self._xdelta
 
-    @property
-    def index(self):
-        """Returns the indices of grids."""
-        return numpy.arange(self.nums)
+	@property
+	def zarea(self):
+		return self._zarea / self.FEET_TO_METERS**2
 
-    @property
-    def xmin(self):
-        """Returns x-minimum boundary indices."""
-        return self.index[self._xmin]
+	@property
+	def _zarea(self):
+		return self._xdelta*self._ydelta
+	
+	@property
+	def volume(self):
+		"""Returns the volume of grids in field units."""
+		return self._volume / self.FEET_TO_METERS**3
 
-    @property
-    def _xmin(self):
-        """Returns x-minimum boundary boolean."""
-        return self.index==self.table[:,0]
+	@property
+	def _volume(self):
+		return np.prod((self._xdelta,self._ydelta,self._zdelta),axis=0)
 
-    @property
-    def xpos(self):
-        """Returns x-positive neighbor indices."""
-        return self.index[self._xpos]
+	@property
+	def nums(self):
+		"""Returns total number of grids."""
+		return self.table.shape[0]
 
-    @property
-    def _xpos(self):
-        """Returns x-positive neighbor boolean."""
-        return self.index!=self.table[:,0]
+	@property
+	def dims(self):
+		"""Returns the flow dimensions."""
+		return int(self.table.shape[1]/2)
 
-    @property
-    def xneg(self):
-        """Returns x-negative neighbor indices."""
-        return self.index[self._xneg]
+	@property
+	def index(self):
+		"""Returns the indices of grids."""
+		return np.arange(self.nums)
+	
+	@property
+	def delta(self):
+		"""Returns the cell sizes in x, y, and z direction, shape = (nums,3)."""
+		return np.column_stack(
+			(self.xdelta, self.ydelta, self.zdelta)
+		)
 
-    @property
-    def _xneg(self):
-        """Returns x-negative neighbor boolean."""
-        return self.index!=self.table[:,1]
+	@property
+	def xmin(self):
+		"""Returns x-minimum boundary indices."""
+		return self.index[self._xmin]
 
-    @property
-    def xmax(self):
-        """Returns x-maximum boundary indices."""
-        return self.index[self._xmax]
+	@property
+	def _xmin(self):
+		"""Returns x-minimum boundary boolean."""
+		return self.index==self.table[:,0]
 
-    @property
-    def _xmax(self):
-        """Returns x-maximum boundary boolean."""
-        return self.index==self.table[:,1]
+	@property
+	def xpos(self):
+		"""Returns x-positive neighbor indices."""
+		return self.index[self._xpos]
 
-    @property
-    def ymin(self):
-        """Returns y-minimum boundary indices."""
-        return self.index[self._ymin]
+	@property
+	def _xpos(self):
+		"""Returns x-positive neighbor boolean."""
+		return self.index!=self.table[:,0]
 
-    @property
-    def _ymin(self):
-        """Returns y-minimum boundary boolean."""
-        return self.index==self.table[:,2] if self.dims>1 else numpy.full(self.nums,True)
+	@property
+	def xneg(self):
+		"""Returns x-negative neighbor indices."""
+		return self.index[self._xneg]
 
-    @property
-    def ypos(self):
-        """Returns y-positive neighbor indices."""
-        return self.index[self._ypos]
+	@property
+	def _xneg(self):
+		"""Returns x-negative neighbor boolean."""
+		return self.index!=self.table[:,1]
 
-    @property
-    def _ypos(self):
-        """Returns y-positive neighbor boolean."""
-        return self.index!=self.table[:,2] if self.dims>1 else numpy.full(self.nums,False)
+	@property
+	def xmax(self):
+		"""Returns x-maximum boundary indices."""
+		return self.index[self._xmax]
 
-    @property
-    def yneg(self):
-        """Returns y-negative neighbor indices."""
-        return self.index[self._yneg]
+	@property
+	def _xmax(self):
+		"""Returns x-maximum boundary boolean."""
+		return self.index==self.table[:,1]
 
-    @property
-    def _yneg(self):
-        """Returns y-negative neighbor boolean."""
-        return self.index!=self.table[:,3] if self.dims>1 else numpy.full(self.nums,False)
+	@property
+	def ymin(self):
+		"""Returns y-minimum boundary indices."""
+		return self.index[self._ymin]
 
-    @property
-    def ymax(self):
-        """Returns y-maximum boundary indices."""
-        return self.index[self._ymax]
+	@property
+	def _ymin(self):
+		"""Returns y-minimum boundary boolean."""
+		return self.index==self.table[:,2] if self.dims>1 else np.full(self.nums,True)
 
-    @property
-    def _ymax(self):
-        """Returns y-maximum boundary boolean."""
-        return self.index==self.table[:,3] if self.dims>1 else numpy.full(self.nums,True)
+	@property
+	def ypos(self):
+		"""Returns y-positive neighbor indices."""
+		return self.index[self._ypos]
 
-    @property
-    def zmin(self):
-        """Returns z-minimum boundary indices."""
-        return self.index[self._zmin]
+	@property
+	def _ypos(self):
+		"""Returns y-positive neighbor boolean."""
+		return self.index!=self.table[:,2] if self.dims>1 else np.full(self.nums,False)
 
-    @property
-    def _zmin(self):
-        """Returns z-minimum boundary boolean."""
-        return self.index==self.table[:,4] if self.dims>2 else numpy.full(self.nums,True)
+	@property
+	def yneg(self):
+		"""Returns y-negative neighbor indices."""
+		return self.index[self._yneg]
 
-    @property
-    def zpos(self):
-        """Returns z-positive neighbor indices."""
-        return self.index[self._zpos]
+	@property
+	def _yneg(self):
+		"""Returns y-negative neighbor boolean."""
+		return self.index!=self.table[:,3] if self.dims>1 else np.full(self.nums,False)
 
-    @property
-    def _zpos(self):
-        """Returns z-positive neighbor boolean."""
-        return self.index!=self.table[:,4] if self.dims>2 else numpy.full(self.nums,False)
+	@property
+	def ymax(self):
+		"""Returns y-maximum boundary indices."""
+		return self.index[self._ymax]
 
-    @property
-    def zneg(self):
-        """Returns z-negative neighbor indices."""
-        return self.index[self._zneg]
+	@property
+	def _ymax(self):
+		"""Returns y-maximum boundary boolean."""
+		return self.index==self.table[:,3] if self.dims>1 else np.full(self.nums,True)
 
-    @property
-    def _zneg(self):
-        """Returns z-negative neighbor boolean."""
-        return self.index!=self.table[:,5] if self.dims>2 else numpy.full(self.nums,False)
+	@property
+	def zmin(self):
+		"""Returns z-minimum boundary indices."""
+		return self.index[self._zmin]
 
-    @property
-    def zmax(self):
-        """Returns z-maximum boundary indices."""
-        return self.index[self._zmax]
+	@property
+	def _zmin(self):
+		"""Returns z-minimum boundary boolean."""
+		return self.index==self.table[:,4] if self.dims>2 else np.full(self.nums,True)
 
-    @property
-    def _zmax(self):
-        """Returns z-maximum boundary boolean."""
-        return self.index==self.table[:,5] if self.dims>2 else numpy.full(self.nums,True)
+	@property
+	def zpos(self):
+		"""Returns z-positive neighbor indices."""
+		return self.index[self._zpos]
+
+	@property
+	def _zpos(self):
+		"""Returns z-positive neighbor boolean."""
+		return self.index!=self.table[:,4] if self.dims>2 else np.full(self.nums,False)
+
+	@property
+	def zneg(self):
+		"""Returns z-negative neighbor indices."""
+		return self.index[self._zneg]
+
+	@property
+	def _zneg(self):
+		"""Returns z-negative neighbor boolean."""
+		return self.index!=self.table[:,5] if self.dims>2 else np.full(self.nums,False)
+
+	@property
+	def zmax(self):
+		"""Returns z-maximum boundary indices."""
+		return self.index[self._zmax]
+
+	@property
+	def _zmax(self):
+		"""Returns z-maximum boundary boolean."""
+		return self.index==self.table[:,5] if self.dims>2 else np.full(self.nums,True)
