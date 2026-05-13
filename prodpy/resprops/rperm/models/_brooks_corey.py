@@ -59,6 +59,17 @@ class BrooksCorey:
         if self.lambda_ <= 0:
             raise ValueError("lambda_ must be positive.")
         
+    def __repr__(self) -> str:
+        return (
+            f"{self.__class__.__name__}("
+            f"Swr={self.Swr}, "
+            f"Snwr={self.Snwr}, "
+            f"krw0={self.krw0}, "
+            f"krnw0={self.krnw0}, "
+            f"lambda_={self.lambda_}"
+            f")"
+        )
+        
     @property
     def mobile_saturation_range(self) -> float:
         """Return the mobile saturation interval: 1 - Swr - Snwr."""

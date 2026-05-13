@@ -32,26 +32,6 @@ class GridDelta(GridBase):
 		self.height = None # Placeholder for reservoir domain total height calculations.
 
 	@property
-	def nums(self):
-		"""Returns tuple of (xnums,ynums,znums)."""
-		return (self.xnums,self.ynums,self.znums)
-
-	@property
-	def xnums(self):
-		"""Returns the number of grids in x-direction."""
-		return self._xdelta.size
-
-	@property
-	def ynums(self):
-		"""Returns the number of grids in y-direction."""
-		return self._ydelta.size
-
-	@property
-	def znums(self):
-		"""Returns the number of grids in z-direction."""
-		return self._zdelta.size
-
-	@property
 	def dims(self):
 		"""Returns the flow dimensions."""
 		return self._dims

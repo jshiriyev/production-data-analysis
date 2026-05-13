@@ -67,6 +67,18 @@ class ModifiedCorey:
         if self.nnw <= 0:
             raise ValueError("nnw must be positive.")
         
+    def __repr__(self) -> str:
+        return (
+            f"{self.__class__.__name__}("
+            f"Swr={self.Swr}, "
+            f"Snwr={self.Snwr}, "
+            f"krw0={self.krw0}, "
+            f"krnw0={self.krnw0}, "
+            f"nw={self.nw}, "
+            f"nnw={self.nnw}"
+            f")"
+        )
+        
     @property
     def mobile_saturation_range(self) -> float:
         """Return mobile saturation interval: 1 - Swr - Snwr."""
