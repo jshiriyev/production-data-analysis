@@ -1,6 +1,6 @@
 import numpy as np
 
-class GridRadial():
+class RadialGrids():
     """Gridding class for the radial-cylindrical flow geometry."""
     
     def __init__(self,rw:float,re:float,num:int,tdelta:np.ndarray=None,zdelta:float|np.ndarray=None):
@@ -128,11 +128,138 @@ class GridRadial():
     def table(self):
         pass
 
+def plot_grid(r0,r1,N):
+
+    gamma = (r1/r0)**(1/N)
+    
+    radius = r0*gamma**np.arange(N+1)
+
+    return radius
+
+def grid_concentric_old(r0,r1,r2,N):
+
+    ratio = np.log(r2/r1)/np.log(r1/r0)
+
+    N1 = N / (ratio+1)
+    N2 = N - N1
+
+    if N1 < N2:
+        N1 = int(np.ceil(N1))
+        N2 = N - N1
+    else:
+        N2 = int(np.ceil(N2))
+        N1 = N - N2
+
+    gamma1 = (r1/r0)**(1/N1)
+    gamma2 = (r2/r1)**(1/N2)
+
+    radius1 = r0*gamma1**np.arange(N1+1)
+    radius2 = r1*gamma2**np.arange(N2+1)
+
+    return radius1, radius2
+
+def grid_concentric(radii, N):
+    """
+    Generate a radial grid for concentric cylindrical reservoir regions.
+
+    Parameters
+    ----------
+    radii : list or array-like
+        Region boundary radii, e.g. [rw, rd, re].
+        Must be strictly increasing.
+    N : int
+        Total number of radial grid cells.
+
+    Returns
+    -------
+    radius : np.ndarray
+        One array of radial grid boundaries.
+        Length will be N + 1.
+    """
+
+    radii = np.asarray(radii, dtype=float)
+
+    if len(radii) < 2:
+        raise ValueError("At least two radii are required.")
+
+    if np.any(radii <= 0):
+        raise ValueError("All radii must be positive.")
+
+    if np.any(np.diff(radii) <= 0):
+        raise ValueError("Radii must be strictly increasing.")
+
+    n_regions = len(radii) - 1
+
+    if N < n_regions:
+        raise ValueError(
+            f"N must be at least {n_regions}, so each region gets at least one cell."
+        )
+
+    # Allocate number of cells proportional to logarithmic radial thickness
+    log_lengths = np.log(radii[1:] / radii[:-1])
+    raw_cells = N * log_lengths / log_lengths.sum()
+
+    # Start with at least one cell per region
+    cells = np.floor(raw_cells).astype(int)
+    cells = np.maximum(cells, 1)
+
+    # Adjust total number of cells to exactly N
+    while cells.sum() < N:
+        fractions = raw_cells - np.floor(raw_cells)
+        idx = np.argmax(fractions)
+        cells[idx] += 1
+
+    while cells.sum() > N:
+        idx_candidates = np.where(cells > 1)[0]
+        idx = idx_candidates[np.argmax(cells[idx_candidates])]
+        cells[idx] -= 1
+
+    # Build grid region by region
+    grid = []
+
+    for i in range(n_regions):
+        r_in = radii[i]
+        r_out = radii[i + 1]
+        n = cells[i]
+
+        gamma = (r_out / r_in) ** (1 / n)
+
+        region_grid = r_in * gamma ** np.arange(n + 1)
+
+        # Avoid duplicating internal boundaries
+        if i > 0:
+            region_grid = region_grid[1:]
+
+        grid.extend(region_grid)
+
+    return np.asarray(grid)
+
 if __name__ == "__main__":
 
-    rad = GridRadial(0.25,1000,4)
+    import matplotlib.pyplot as plt
 
-    print(rad.gamma)
-    print(rad.r0)
-    print(rad.radius)
-    print(rad.rdelta)
+    # rad = RadialGrids(0.25,1000,4)
+
+    # print(rad.gamma)
+    # print(rad.r0)
+    # print(rad.radius)
+    # print(rad.rdelta)
+
+    continuous = plot_grid(r0=0.1,r1=10,N=5)
+    sub1,sub2 = grid_concentric_old(r0=0.1,r1=8,r2=10,N=5)
+    main = grid_concentric(radii=[0.1,8,10],N=10)
+
+    print(continuous.shape)
+    print(main.shape)
+
+    plt.plot(continuous,np.zeros_like(continuous),'o-')
+    plt.plot(sub1,np.zeros_like(sub1)+5,'s-')
+    plt.plot(sub2,np.zeros_like(sub2)+5,'^-')
+    plt.plot(main,np.zeros_like(main)-5,'o-')
+
+    plt.xscale('log')
+
+    plt.xlabel('Radius (m)')
+    plt.title('Radial Grid')
+    plt.grid()
+    plt.show()
