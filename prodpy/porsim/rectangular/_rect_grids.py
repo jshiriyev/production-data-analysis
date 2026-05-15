@@ -13,7 +13,7 @@ class RectGrids(BaseClass):
 		xdelta: np.ndarray,
 		ydelta: np.ndarray,
 		zdelta: np.ndarray,
-		depths: float = 1000.,
+		depth: float = 1000.,
 		dims: int|None = None
 	):
 		"""
@@ -27,13 +27,13 @@ class RectGrids(BaseClass):
 			Cell widths in the y-direction, ft.
 		zdelta : float or 1-D array-like of float
 			Cell heights in the z-direction, ft.
-		depths : float, default 1000.0
+		depth : float, default 1000.0
 			Depth of the reservoir-domain top surface, ft.
 		dims   : {1, 2, 3}, optional
 			Flow dimension used to build the neighbor table. If omitted, the
 			dimension is inferred from active grid counts.
 		"""
-		super().__init__(xdelta,ydelta,zdelta,depths)
+		super().__init__(xdelta,ydelta,zdelta,depth)
 
 		self.dims = dims
 
@@ -180,7 +180,7 @@ class RectGrids(BaseClass):
 		xdelta: np.ndarray,
 		ydelta: np.ndarray,
 		zdelta: np.ndarray,
-		depths: float = 1000.,
+		depth: float = 1000.,
 		dims: int|None = None
 	):
 		"""
@@ -194,12 +194,12 @@ class RectGrids(BaseClass):
 			Cell widths in the y-direction, ft.
 		zdelta : float or 1-D array-like of float
 			Cell heights in the z-direction, ft.
-		depths : float, default 1000.0
+		depth : float, default 1000.0
 			Depth of the reservoir-domain top surface, ft.
 		dims   : {1, 2, 3}, optional
 			Flow dimension used to build the neighbor table.
 		"""
-		return cls(xdelta,ydelta,zdelta,depths,dims)
+		return cls(xdelta,ydelta,zdelta,depth,dims)
 
 	@staticmethod
 	def _validate_size_tuple(size: tuple[float,float,float]) -> tuple[float,float,float]:
@@ -244,7 +244,7 @@ class RectGrids(BaseClass):
 		cls,
 		size: tuple[float,float,float],
 		nums: tuple[int,int,int],
-		depths: float = 1000.,
+		depth: float = 1000.,
 		dims: int|None =None
 	):
 		"""
@@ -256,7 +256,7 @@ class RectGrids(BaseClass):
 			Reservoir dimensions ``(length, width, height)`` in feet.
 		nums : tuple of int
 			Number of cells along ``(x, y, z)``.
-		depths : float, default 1000.0
+		depth : float, default 1000.0
 			Depth of the reservoir-domain top surface, ft.
 		dims : {1, 2, 3}, optional
 			Flow dimension used to build the neighbor table.
@@ -268,7 +268,7 @@ class RectGrids(BaseClass):
 		ydelta = np.full(nums[1],size[1]/nums[1])
 		zdelta = np.full(nums[2],size[2]/nums[2])
 
-		return cls(xdelta,ydelta,zdelta,depths,dims)
+		return cls(xdelta,ydelta,zdelta,depth,dims)
 
 	@cached_property
 	def grids(self):
@@ -281,7 +281,7 @@ class RectGrids(BaseClass):
 		ydelta = np.tile(ydelta,self.znums)
 		zdelta = np.repeat(self.zdelta,xynums)
 
-		depths = np.full(xynums,float(self.depths[0]))
+		depths = np.full(xynums,self.depth.item())
 
 		height = np.cumsum(np.insert(self.zdelta[:-1],0,0))
 		depths = np.tile(depths,self.znums)+np.repeat(height,xynums)
@@ -312,7 +312,7 @@ class RectGrids(BaseClass):
 		yedges = np.insert(np.cumsum(self.ydelta),0,0.)
 		zedges = np.insert(np.cumsum(self.zdelta),0,0.)
 
-		top_depths = np.full((self.ynums+1,self.xnums+1),float(self.depths[0]))
+		top_depths = np.full((self.ynums+1,self.xnums+1),self.depth.item())
 		depth_layers = top_depths[None,:,:]+zedges[:,None,None]
 
 		return xedges, yedges, depth_layers

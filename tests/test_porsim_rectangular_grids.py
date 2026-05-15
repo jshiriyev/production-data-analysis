@@ -6,13 +6,13 @@ from prodpy.porsim.rectangular._rect_grids import RectGrids
 
 
 def test_grid_base_converts_public_feet_to_internal_si_arrays():
-	grid = BaseClass([10.0, 20.0], 30.0, [40.0], depths=0.0)
+	grid = BaseClass([10.0, 20.0], 30.0, [40.0], depth=0.0)
 
 	np.testing.assert_allclose(grid.xdelta, [10.0, 20.0])
 	np.testing.assert_allclose(grid._xdelta, np.array([10.0, 20.0])*BaseClass.FEET_TO_METERS)
 	np.testing.assert_allclose(grid.ydelta, [30.0])
 	np.testing.assert_allclose(grid.zdelta, [40.0])
-	np.testing.assert_allclose(grid.depths, [0.0])
+	np.testing.assert_allclose(grid.depth, [0.0])
 
 
 @pytest.mark.parametrize("field", ["xdelta", "ydelta", "zdelta"])
@@ -33,7 +33,7 @@ def test_grid_base_rejects_invalid_cell_dimensions(field, value, message):
 		"xdelta": [10.0],
 		"ydelta": [20.0],
 		"zdelta": [30.0],
-		"depths": 1000.0,
+		"depth": 1000.0,
 	}
 	kwargs[field] = value
 
@@ -44,20 +44,20 @@ def test_grid_base_rejects_invalid_cell_dimensions(field, value, message):
 @pytest.mark.parametrize(
 	("value", "message"),
 	[
-		([], "scalar"),
+		([], "empty"),
 		([1000.0, np.nan], "scalar"),
 		([1000.0, np.inf], "scalar"),
 		(["bad"], "convertible"),
 		([[1000.0, 1005.0]], "scalar"),
 	],
 )
-def test_grid_base_rejects_invalid_depths(value, message):
+def test_grid_base_rejects_invalid_depth(value, message):
 	with pytest.raises(ValueError, match=message):
-		BaseClass([10.0], [20.0], [30.0], depths=value)
+		BaseClass([10.0], [20.0], [30.0], depth=value)
 
 
 def test_rect_grids_plot3d_geometry_uses_public_oilfield_units():
-	grid = RectGrids([10.0, 20.0], [30.0], [5.0, 15.0], depths=1000.0)
+	grid = RectGrids([10.0, 20.0], [30.0], [5.0, 15.0], depth=1000.0)
 
 	xedges,yedges,depth_layers = grid._plot3d_geometry()
 
@@ -74,14 +74,14 @@ def test_rect_grids_plot3d_geometry_uses_public_oilfield_units():
 	np.testing.assert_allclose(depth_layers[-1],depth_layers[0]+20.0)
 
 
-def test_rect_grids_rejects_non_scalar_depths():
-	with pytest.raises(ValueError, match="depths must be scalar"):
-		RectGrids([10.0, 20.0], [30.0], [5.0], depths=[1000.0, 1005.0, 1010.0])
+def test_rect_grids_rejects_non_scalar_depth():
+	with pytest.raises(ValueError, match="depth must be scalar"):
+		RectGrids([10.0, 20.0], [30.0], [5.0], depth=[1000.0, 1005.0, 1010.0])
 
 
 def test_rect_grids_plot3d_returns_plotly_figure_when_available():
 	go = pytest.importorskip("plotly.graph_objects")
-	grid = RectGrids([10.0], [20.0], [5.0], depths=1000.0)
+	grid = RectGrids([10.0], [20.0], [5.0], depth=1000.0)
 
 	fig = grid.plot3d(show=False)
 
@@ -95,7 +95,7 @@ def test_rect_grids_plot3d_returns_plotly_figure_when_available():
 
 def test_rect_grids_plot3d_writes_html_when_path_is_given(monkeypatch):
 	go = pytest.importorskip("plotly.graph_objects")
-	grid = RectGrids([10.0], [20.0], [5.0], depths=1000.0)
+	grid = RectGrids([10.0], [20.0], [5.0], depth=1000.0)
 	call = {}
 
 	def fake_write_html(self, file, **kwargs):
@@ -113,7 +113,7 @@ def test_rect_grids_plot3d_writes_html_when_path_is_given(monkeypatch):
 
 
 def test_rect_grids_clears_cached_geometry_when_dimensions_change():
-	grid = RectGrids([10.0, 20.0], [30.0], [5.0], depths=1000.0)
+	grid = RectGrids([10.0, 20.0], [30.0], [5.0], depth=1000.0)
 	assert grid.table.shape == (2,2)
 	assert grid.grids.nums == 2
 
@@ -126,7 +126,7 @@ def test_rect_grids_clears_cached_geometry_when_dimensions_change():
 
 
 def test_rect_grids_updates_inferred_dims_when_dimensions_change():
-	grid = RectGrids([10.0], [20.0], [5.0], depths=1000.0)
+	grid = RectGrids([10.0], [20.0], [5.0], depth=1000.0)
 	assert grid.dims == 1
 	assert grid.table.shape == (1,2)
 
@@ -137,7 +137,7 @@ def test_rect_grids_updates_inferred_dims_when_dimensions_change():
 
 
 def test_rect_grids_preserves_explicit_dims_when_dimensions_change():
-	grid = RectGrids([10.0], [20.0], [5.0], depths=1000.0, dims=1)
+	grid = RectGrids([10.0], [20.0], [5.0], depth=1000.0, dims=1)
 	assert grid.dims == 1
 
 	grid.zdelta = [5.0, 5.0]
@@ -147,7 +147,7 @@ def test_rect_grids_preserves_explicit_dims_when_dimensions_change():
 
 
 def test_rect_grids_allows_explicit_three_dimensional_flow_with_one_z_layer():
-	grid = RectGrids([10.0], [20.0], [5.0], depths=1000.0, dims=3)
+	grid = RectGrids([10.0], [20.0], [5.0], depth=1000.0, dims=3)
 
 	assert grid.dims == 3
 	assert grid.table.shape == (1,6)
@@ -155,12 +155,12 @@ def test_rect_grids_allows_explicit_three_dimensional_flow_with_one_z_layer():
 
 
 def test_rect_grids_from_size_and_nums_builds_uniform_grid():
-	grid = RectGrids.from_size_and_nums((100.0, 80.0, 20.0), (2, 4, 1), depths=900.0)
+	grid = RectGrids.from_size_and_nums((100.0, 80.0, 20.0), (2, 4, 1), depth=900.0)
 
 	np.testing.assert_allclose(grid.xdelta, [50.0, 50.0])
 	np.testing.assert_allclose(grid.ydelta, [20.0, 20.0, 20.0, 20.0])
 	np.testing.assert_allclose(grid.zdelta, [20.0])
-	np.testing.assert_allclose(grid.depths, [900.0])
+	np.testing.assert_allclose(grid.depth, [900.0])
 	assert grid.dims == 2
 
 
@@ -198,7 +198,7 @@ def test_rect_grids_grids_expands_axis_arrays_to_flattened_cells():
 		[10.0, 20.0],
 		[30.0, 40.0],
 		[5.0, 15.0],
-		depths=1000.0,
+		depth=1000.0,
 	).grids
 
 	np.testing.assert_allclose(grids.xdelta, [10.0, 20.0, 10.0, 20.0, 10.0, 20.0, 10.0, 20.0])
@@ -213,13 +213,13 @@ def test_rect_grids_grids_expands_axis_arrays_to_flattened_cells():
 
 
 def test_rect_grids_grids_repr_summarizes_shape():
-	grids = RectGrids([10.0, 20.0], [30.0], [5.0], depths=1000.0).grids
+	grids = RectGrids([10.0, 20.0], [30.0], [5.0], depth=1000.0).grids
 
 	assert repr(grids) == "Grids(nums=2, dims=1)"
 
 
 def test_rect_grids_grids_preserves_public_field_units_and_internal_si_units():
-	grids = RectGrids([10.0, 20.0], [30.0], [5.0], depths=1000.0).grids
+	grids = RectGrids([10.0, 20.0], [30.0], [5.0], depth=1000.0).grids
 
 	np.testing.assert_allclose(grids.xdelta, [10.0, 20.0])
 	np.testing.assert_allclose(grids._xdelta, np.array([10.0, 20.0])*grids.FEET_TO_METERS)
@@ -229,7 +229,7 @@ def test_rect_grids_grids_preserves_public_field_units_and_internal_si_units():
 
 
 def test_rect_grids_grids_calculates_delta_area_and_volume():
-	grids = RectGrids([10.0, 20.0], [30.0], [5.0], depths=1000.0).grids
+	grids = RectGrids([10.0, 20.0], [30.0], [5.0], depth=1000.0).grids
 
 	np.testing.assert_allclose(grids.delta, [[10.0, 30.0, 5.0], [20.0, 30.0, 5.0]])
 	np.testing.assert_allclose(grids.xarea, [150.0, 150.0])
@@ -243,7 +243,7 @@ def test_rect_grids_grids_exposes_neighbor_table_and_boundary_indices():
 		[10.0, 20.0],
 		[30.0, 40.0],
 		[5.0, 15.0],
-		depths=1000.0,
+		depth=1000.0,
 	).grids
 
 	np.testing.assert_array_equal(
@@ -275,7 +275,7 @@ def test_rect_grids_grids_exposes_neighbor_table_and_boundary_indices():
 
 
 def test_rect_grids_grids_uses_boundary_defaults_for_inactive_dimensions():
-	grids = RectGrids([10.0, 20.0], [30.0], [5.0], depths=1000.0).grids
+	grids = RectGrids([10.0, 20.0], [30.0], [5.0], depth=1000.0).grids
 
 	np.testing.assert_array_equal(grids.xmin, [0])
 	np.testing.assert_array_equal(grids.xmax, [1])
@@ -290,7 +290,7 @@ def test_rect_grids_grids_uses_boundary_defaults_for_inactive_dimensions():
 
 
 def test_rect_grids_grids_public_fields_are_read_only():
-	grids = RectGrids([10.0], [20.0], [5.0], depths=1000.0).grids
+	grids = RectGrids([10.0], [20.0], [5.0], depth=1000.0).grids
 
 	with pytest.raises(AttributeError):
 		grids.xdelta = [1.0]
